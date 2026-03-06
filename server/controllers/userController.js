@@ -13,6 +13,29 @@ const normalizeEmail = (email) => email?.trim().toLowerCase();
 export const registerUser = async (req, res) => {
   try {
     let { fullName, phone, email, password } = req.body;
+
+    // Validation
+    if (!fullName || !phone || !email || !password) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide fullName, phone, email, and password"
+      });
+    }
+
+    if (phone.length < 10) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Phone number must be at least 10 digits"
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must be at least 6 characters"
+      });
+    }
+
     email = normalizeEmail(email);
 
     const existingUser = await User.findOne({
@@ -98,6 +121,15 @@ export const registerUser = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
+
+    // Validation
+    if (!email || !otp) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide email and OTP"
+      });
+    }
+
     const normalizedEmail = normalizeEmail(email);
 
     const user = await User.findOne({ email: normalizedEmail });
@@ -143,9 +175,19 @@ export const verifyEmail = async (req, res) => {
 /* -------------------- RESEND OTP -------------------- */
 export const resendOTP = async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
+    const { email } = req.body;
 
-    const user = await User.findOne({ email });
+    // Validation
+    if (!email) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide email"
+      });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(404).json({
@@ -173,7 +215,7 @@ export const resendOTP = async (req, res) => {
     await user.save();
 
     await sendEmail(
-      email,
+      normalizedEmail,
       "BIKEONRENT Resend OTP",
       `Your new OTP is: ${otp}`
     );
@@ -193,6 +235,14 @@ export const resendOTP = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide email and password"
+      });
+    }
 
     const user = await User.findOne({ email }).select("+password");
 
@@ -310,9 +360,19 @@ export const updatePassword = async (req, res) => {
 /* -------------------- FORGOT PASSWORD -------------------- */
 export const forgotPassword = async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
+    const { email } = req.body;
 
-    const user = await User.findOne({ email });
+    // Validation
+    if (!email) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide email"
+      });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({
         status: "fail",
@@ -335,7 +395,7 @@ export const forgotPassword = async (req, res) => {
 
     // ✅ SEND EMAIL HERE (AFTER SAVE)
     await sendEmail(
-      email,
+      normalizedEmail,
       "Reset Your BIKEONRENT Password",
       `Click this link to reset your password:
 
@@ -361,6 +421,23 @@ This link will expire in 15 minutes.`
 /* -------------------- RESET PASSWORD -------------------- */
 export const resetPassword = async (req, res) => {
   try {
+    const { password } = req.body;
+
+    // Validation
+    if (!password) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide new password"
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Password must be at least 6 characters"
+      });
+    }
+
     const hashedToken = crypto
       .createHash("sha256")
       .update(req.params.token)
@@ -378,7 +455,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    user.password = await bcrypt.hash(req.body.password, 12);
+    user.password = await bcrypt.hash(password, 12);
     user.passwordResetToken = undefined;
     user.passwordResetExpiry = undefined;
     await user.save();

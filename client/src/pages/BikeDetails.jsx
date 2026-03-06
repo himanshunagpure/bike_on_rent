@@ -59,11 +59,14 @@ const BikeDetails = () => {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-3xl shadow-2xl p-10"
         >
+          
           <img
-            src={scooty}
+            src={`http://localhost:5000/${bike.images[0]}`}
             alt={bike.bikeName}
             className="w-full h-96 object-contain"
+            
           />
+        
         </motion.div>
 
         {/* RIGHT SIDE DETAILS */}
@@ -138,6 +141,21 @@ const BikeDetails = () => {
                 <span className="font-medium">Model:</span>
                 <br />
                 {bike.model}
+              </div>
+              <div>
+                <span className="font-medium">Mileage:</span>
+                <br />
+                {bike.mileage} km/l
+              </div>
+              <div>
+                <span className="font-medium">Address:</span>
+                <br />
+                {bike.location?.addressLine}
+              </div>
+              <div>
+                <span className="font-medium">Availability:</span>
+                <br />
+                {bike.availability ?.type}
               </div>
             </div>
           </div>

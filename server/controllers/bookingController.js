@@ -3,58 +3,123 @@ import Bike from "../models/bike.js";
 import { setBikeAvailability } from "../utils/updateBikeAvailability.js";
 
 /* CREATE BOOKING */
+
+import User from "../models/user.js";
+
 export const createBooking = async (req, res) => {
   try {
-    const renter = req.user?.userId; // safe access
-    const { bike, start, end, durationType } = req.body;
+    const userId = req.user?.userId;
+    const { bikeId, startDate, endDate, durationType } = req.body;
 
-    if (!renter) return res.status(401).json({ message: "Unauthorized" });
+    // 1️ Auth Check
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    if (!bike || !start || !end || !durationType) {
+    // 2️ Required Fields
+    if (!bikeId || !startDate || !endDate || !durationType) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const bikeData = await Bike.findById(bike);
-    if (!bikeData || !bikeData.isAvailable) {
-      return res.status(404).json({ message: "Bike not available" });
+    // 3️ Check User
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Prevent overlapping bookings
+    // 4️ KYC Verification Check
+    // if (!user.documents?.isVerified) {
+    //   return res.status(400).json({
+    //     message: "Please complete KYC verification before booking",
+    //   });
+    // }
+
+    // 5️ Check Bike
+    const bikeData = await Bike.findById(bikeId);
+    if (!bikeData) {
+      return res.status(404).json({ message: "Bike not found" });
+    }
+
+    // 6️ Date Validation
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start) || isNaN(end)) {
+      return res.status(400).json({ message: "Invalid date format" });
+    }
+
+    if (start >= end) {
+      return res.status(400).json({
+        message: "End date must be after start date",
+      });
+    }
+
+    // 7️ Overlap Check (Block all active + pending bookings)
     const conflict = await Booking.findOne({
-      bike,
-      status: { $in: ["confirmed", "ongoing"] },
-      "bookingTime.start": { $lt: new Date(end) },
-      "bookingTime.end": { $gt: new Date(start) },
+      bike: bikeId,
+      bookingStatus: {
+        $in: [
+          "PENDING_VENDOR_APPROVAL",
+          "CONFIRMED",
+          "ACTIVE_RIDE",
+        ],
+      },
+      startDate: { $lt: end },
+      endDate: { $gt: start },
     });
 
     if (conflict) {
-      return res.status(400).json({ message: "Bike already booked for this time" });
+      return res.status(400).json({
+        message: "Bike already booked for selected time",
+      });
     }
 
-    // Calculate total
-    const hours = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60));
-    const totalAmount =
-      durationType === "day"
-        ? bikeData.pricing.perDay
-        : hours * bikeData.pricing.perHour;
+    // 8️ Price Calculation
+    const hours = Math.ceil((end - start) / (1000 * 60 * 60));
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    let totalAmount = 0;
+
+    if (durationType === "day") {
+      totalAmount = days * bikeData.pricing.perDay;
+    } else if (durationType === "hour") {
+      totalAmount = hours * bikeData.pricing.perHour;
+    } else {
+      return res.status(400).json({ message: "Invalid duration type" });
+    }
 
     const platformFee = totalAmount * 0.1;
-    const ownerEarning = totalAmount - platformFee;
+    const vendorEarning = totalAmount - platformFee;
 
+    // 9️ Create Booking
     const booking = await Booking.create({
-      bike,
+      renter: userId,
       owner: bikeData.owner,
-      renter,
-      bookingTime: { start, end },
+      bike: bikeId,
+      startDate: start,
+      endDate: end,
       durationType,
-      amount: { total: totalAmount, platformFee, ownerEarning },
-      status: "pending", // initially pending
+      amount: {
+        total: totalAmount,
+        platformFee,
+        vendorEarning,
+      },
+      paymentStatus: "PENDING",
+      bookingStatus: "PENDING_VENDOR_APPROVAL",
     });
 
-    res.status(201).json({ message: "Booking created", booking });
-  } catch (err) {
-    console.error("CreateBooking Error:", err.message); // log actual error
-    res.status(500).json({ error: "Internal server error", details: err.message });
+    return res.status(201).json({
+      success: true,
+      message: "Booking created successfully",
+      booking,
+    });
+
+  } catch (error) {
+    console.error("CreateBooking Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 /* GET MY BOOKINGS */
@@ -168,5 +233,30 @@ export const deleteBooking = async (req, res) => {
     res.json({ message: "Booking deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+/* ===============================
+   UPLOAD BOOKING DOCUMENTS
+   (used by BookingPage client)
+=============================== */
+export const uploadBookingDocs = async (req, res) => {
+  try {
+    // expect aadharCard and drivingLicense fields
+    if (!req.files || !req.files.aadharCard || !req.files.drivingLicense) {
+      return res.status(400).json({ message: "Both documents are required" });
+    }
+
+    const aadharFile = req.files.aadharCard[0];
+    const licenseFile = req.files.drivingLicense[0];
+
+    // returning accessible paths (static middleware serves /uploads)
+    const aadharUrl = `${req.protocol}://${req.get("host")}/uploads/${aadharFile.filename}`;
+    const licenseUrl = `${req.protocol}://${req.get("host")}/uploads/${licenseFile.filename}`;
+
+    return res.json({ aadharUrl, licenseUrl });
+  } catch (err) {
+    console.error("uploadBookingDocs error", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

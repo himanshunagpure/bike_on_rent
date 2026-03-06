@@ -95,4 +95,7 @@ const userSchema = new mongoose.Schema(
 // ✅ Geo Index
 userSchema.index({ location: "2dsphere" });
 
-export default mongoose.model("User", userSchema);
+// prevent OverwriteModelError in development/hot-reload environments
+// if the model already exists, reuse it instead of compiling again.
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+export default User;

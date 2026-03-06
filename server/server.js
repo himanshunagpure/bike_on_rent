@@ -30,6 +30,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/review", reviewRoutes);
+app.use("/uploads", express.static("uploads"));
 
 const PORT = process.env.PORT || 5000;
 console.log("ENV TEST:", process.env.RAZORPAY_KEY_ID);

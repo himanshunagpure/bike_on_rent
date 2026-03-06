@@ -17,8 +17,8 @@ const BikeSchema = new mongoose.Schema(
     =============================== */
     bikeName: {
       type: String,
-      trim: true,
-      required: true
+      required: true,
+      trim: true
     },
 
     bikeNumber: {
@@ -26,7 +26,8 @@ const BikeSchema = new mongoose.Schema(
       required: true,
       unique: true,
       uppercase: true,
-      trim: true
+      trim: true,
+      match: /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/
     },
 
     bikeType: {
@@ -37,16 +38,19 @@ const BikeSchema = new mongoose.Schema(
 
     brand: {
       type: String,
+      required: true,
       trim: true
     },
 
     model: {
       type: String,
+      required: true,
       trim: true
     },
 
     year: {
       type: Number,
+      required: true,
       min: 2000,
       max: new Date().getFullYear()
     },
@@ -57,20 +61,26 @@ const BikeSchema = new mongoose.Schema(
     },
 
     /* ===============================
-       TECHNICAL SPECIFICATIONS
+       TECHNICAL DETAILS
     =============================== */
     fuelType: {
       type: String,
-      enum: ["petrol", "electric", "hybrid"]
+      enum: ["petrol", "electric", "hybrid"],
+      required: true
     },
 
     transmission: {
       type: String,
-      enum: ["manual", "automatic"]
+      enum: ["manual", "automatic"],
+      required: true
     },
 
     engineCapacity: {
-      type: Number // Example: 110, 150 (cc)
+      type: Number
+    },
+
+    mileage: {
+      type: Number
     },
 
     /* ===============================
@@ -79,13 +89,15 @@ const BikeSchema = new mongoose.Schema(
     pricing: {
       perHour: {
         type: Number,
-        required: true,
-        min: 0
+        required: true
       },
       perDay: {
         type: Number,
-        required: true,
-        min: 0
+        required: true
+      },
+      weekendMultiplier: {
+        type: Number,
+        default: 1
       }
     },
 
@@ -125,6 +137,39 @@ const BikeSchema = new mongoose.Schema(
       default: "moderate"
     },
 
+    /* ===============================
+       AVAILABILITY SYSTEM
+    =============================== */
+    availability: {
+      type: {
+        type: String,
+        enum: ["calendar", "always"],
+        default: "calendar"
+      },
+
+      alwaysAvailable: {
+        type: Boolean,
+        default: false
+      },
+
+      calendar: [
+        {
+          start: Date,
+          end: Date
+        }
+      ],
+
+      weekly: {
+        monday: { type: Boolean, default: true },
+        tuesday: { type: Boolean, default: true },
+        wednesday: { type: Boolean, default: true },
+        thursday: { type: Boolean, default: true },
+        friday: { type: Boolean, default: true },
+        saturday: { type: Boolean, default: true },
+        sunday: { type: Boolean, default: true }
+      }
+    },
+
     blockedDates: [
       {
         start: Date,
@@ -132,17 +177,14 @@ const BikeSchema = new mongoose.Schema(
       }
     ],
 
-    /* ===============================
-       AVAILABILITY
-    =============================== */
-    isAvailable: {
-      type: Boolean,
-      default: true
+    bookingLockUntil: {
+      type: Date
     },
 
-    availabilityWindow: {
-      startTime: Date,
-      endTime: Date
+    isAvailable: {
+      type: Boolean,
+      default: true,
+      index: true
     },
 
     totalRides: {
@@ -151,7 +193,7 @@ const BikeSchema = new mongoose.Schema(
     },
 
     /* ===============================
-       LOCATION (GEO SEARCH READY)
+       LOCATION
     =============================== */
     location: {
       city: {
@@ -162,6 +204,7 @@ const BikeSchema = new mongoose.Schema(
       addressLine: String,
       landmark: String,
       pincode: String,
+
       coordinates: {
         type: {
           type: String,
@@ -169,37 +212,41 @@ const BikeSchema = new mongoose.Schema(
           default: "Point"
         },
         coordinates: {
-          type: [Number], // [longitude, latitude]
+          type: [Number], // [lng, lat]
           required: true
         }
       }
     },
 
     /* ===============================
-       DOCUMENT VERIFICATION
+       DOCUMENTS (MANDATORY)
     =============================== */
     documents: {
-      rcBookVerified: {
-        type: Boolean,
-        default: false
+      rcBook: {
+        url: { type: String, required: true },
+        verified: { type: Boolean, default: false }
       },
-      insuranceValid: {
-        type: Boolean,
-        default: false
+      insurance: {
+        url: { type: String, required: true },
+        validTill: { type: Date, required: true },
+        verified: { type: Boolean, default: false }
+      },
+      pollution: {
+        url: { type: String, required: true },
+        validTill: { type: Date, required: true }
       }
     },
 
     /* ===============================
        MEDIA
     =============================== */
-    images: [
-      {
-        type: String
-      }
-    ],
+    images: {
+      type: [String],
+      validate: [arr => arr.length >= 2, "Minimum 2 images required"]
+    },
 
     /* ===============================
-       RATING SYSTEM
+       RATING
     =============================== */
     rating: {
       average: {
@@ -233,18 +280,21 @@ const BikeSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true // adds createdAt & updatedAt automatically
+    timestamps: true
   }
 );
 
 /* ===============================
-   INDEXES (VERY IMPORTANT)
+   INDEXES
 =============================== */
 
-// Geospatial index
+// Geo search
 BikeSchema.index({ "location.coordinates": "2dsphere" });
 
-// Search index
+// Search
 BikeSchema.index({ bikeName: "text", brand: "text", model: "text" });
+
+// Filter optimization
+BikeSchema.index({ isAvailable: 1, adminStatus: 1 });
 
 export default mongoose.model("Bike", BikeSchema);
