@@ -11,7 +11,7 @@ import {
 } from "../controllers/bookingController.js";
 
 import authMiddleware from "../middleware/authmiddleware.js";
-import { upload } from "../middleware/upload.js";
+import upload from "../middleware/upload.js";
 
 console.log("Booking Routes Loaded");
 const router = express.Router();

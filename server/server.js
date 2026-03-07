@@ -13,6 +13,7 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import damageReportRoutes from "./routes/damageReportRoutes.js";
 // import disputeCommentRoutes from "./routes/disputeCommentRoutes.js";
 
 
@@ -31,6 +32,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/uploads", express.static("uploads"));
+app.use("/api/damage-reports", damageReportRoutes);
 
 const PORT = process.env.PORT || 5000;
 console.log("ENV TEST:", process.env.RAZORPAY_KEY_ID);
