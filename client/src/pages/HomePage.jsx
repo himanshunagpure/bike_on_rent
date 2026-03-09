@@ -159,9 +159,12 @@ const HomePage = () => {
             Publish Bike
           </button>
 
-          <button className="flex items-center gap-1.5 bg-[#20B2AA] text-white px-4 py-2 rounded-[10px] text-sm font-bold hover:bg-[#1a9e97] transition-all shadow-md shadow-teal-200">
+          <button 
+            onClick={() => navigate("/dashboard")}
+           className="flex items-center gap-1.5 bg-[#20B2AA] text-white px-4 py-2 rounded-[10px] text-sm font-bold hover:bg-[#1a9e97] transition-all shadow-md shadow-teal-200">
             <User size={14} />
             Profile
+
           </button>
         </div>
       </nav>

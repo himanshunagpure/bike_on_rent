@@ -7,6 +7,7 @@ import BikeDetails from "./pages/BikeDetails";
 import ExploreBikes from "./pages/ExploreBikes";
 import BookingPage from "./pages/BookingPage";
 import AdminRoutes from "./routes/AdminRoutes";
+import UserDashboard from "./pages/UserDashboard";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/bikes/:bikeId" element={<BikeDetails />} />
       <Route path="/booking/:bikeId" element={<BookingPage />} />
       <Route path="/admin/*" element={<AdminRoutes />} />
+      <Route path="/dashboard" element={<UserDashboard />} />
     </Routes>
   );
 }

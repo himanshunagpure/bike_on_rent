@@ -326,3 +326,20 @@ export const blockDates = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/* ===============================
+   GET USER'S BIKES
+=============================== */
+export const getUserBikes = async (req, res) => {
+  try {
+    const ownerId = req.user.userId;
+
+    const bikes = await Bike.find({ owner: ownerId, isDeleted: false })
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, bikes });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -5,7 +5,8 @@ import {
   getBikes,
   getBikeById,
   updateBike,
-  deleteBike
+  deleteBike,
+  getUserBikes
 } from "../controllers/bikeController.js";
 
 import authMiddleware from "../middleware/authmiddleware.js";
@@ -38,6 +39,9 @@ router.post(
 
 // GET ALL
 router.get("/", getBikes);
+
+// GET USER'S BIKES
+router.get("/user/my", authMiddleware, getUserBikes);
 
 // GET SINGLE
 router.get("/:id", getBikeById);
