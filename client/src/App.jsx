@@ -6,7 +6,7 @@ import PublishBike from "./pages/PublishBike";
 import BikeDetails from "./pages/BikeDetails";
 import ExploreBikes from "./pages/ExploreBikes";
 import BookingPage from "./pages/BookingPage";
-import AdminRoutes from "./routes/AdminRoutes";
+// import AdminRoutes from "./routes/AdminRoutes";
 import UserDashboard from "./pages/UserDashboard";
 import OwnerHandover from "./pages/OwnerHandover";
 import PickupBike from "./pages/PickupBike";
@@ -23,7 +23,7 @@ function App() {
       <Route path="/bikes" element={<ExploreBikes />} />
       <Route path="/bikes/:bikeId" element={<BikeDetails />} />
       <Route path="/booking/:bikeId" element={<BookingPage />} />
-      <Route path="/admin/*" element={<AdminRoutes />} />
+      {/* <Route path="/admin/*" element={<AdminRoutes />} /> */}
       <Route path="/dashboard" element={<UserDashboard />} />
       <Route path="/handover/:id" element={<OwnerHandover />} />
       <Route path="/pickup/:id" element={<PickupBike />} />

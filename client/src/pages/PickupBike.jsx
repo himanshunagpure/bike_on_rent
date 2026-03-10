@@ -38,7 +38,6 @@ const PickupBike = () => {
         setPageLoading(false);
       }
     };
-
     fetchBooking();
 
   }, [id, token]);
