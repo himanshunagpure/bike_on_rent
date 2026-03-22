@@ -12,7 +12,7 @@ const PickupBike = () => {
   const [error, setError] = useState(null);
 
   const token = localStorage.getItem("token");
-
+  const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   useEffect(() => {
 
     if (!id) return;
@@ -21,7 +21,7 @@ const PickupBike = () => {
       try {
 
         const res = await axios.get(
-          `http://localhost:5000/api/bookings/${id}`,
+          `${API}/bookings/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -50,7 +50,7 @@ const PickupBike = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/bookings/generate-otp",
+        `${API}/bookings/generate-otp`,
         { bookingId: id },
         {
           headers: {
@@ -98,7 +98,7 @@ const PickupBike = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         Booking not found
-      </div>
+      </div> 
     );
   }
 
@@ -269,4 +269,4 @@ const PickupBike = () => {
   );
 };
 
-export default PickupBike;
+export default PickupBike;                                                                    

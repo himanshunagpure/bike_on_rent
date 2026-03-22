@@ -1,10 +1,8 @@
-// BikeDetails.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, Calendar, IndianRupee } from "lucide-react";
+import { MapPin, Star, Shield, Clock, Calendar, ChevronLeft, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import scooty from "../assets/scooty.png";
 
 const BikeDetails = () => {
   const { bikeId } = useParams();
@@ -13,162 +11,181 @@ const BikeDetails = () => {
   const [bike, setBike] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBike = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5000/api/bikes/${bikeId}`
-        );
 
+    const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get(`${API}/bikes/${bikeId}`);
         setBike(res.data.data);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchBike();
+    })();
   }, [bikeId]);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen flex justify-center items-center bg-[#F0FDFA]">
-        Loading bike details...
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#f5fafa]">
+        <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-500 rounded-full animate-spin"></div>
+        <p className="text-gray-500">Loading bike...</p>
       </div>
     );
-  }
 
-  if (!bike) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-red-500">
-        Bike not found
-      </div>
-    );
-  }
+  if (!bike) return <div className="p-10 text-red-500">Bike not found</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F0FDFA] via-white to-[#E6FFFA] px-6 md:px-16 py-20">
+    <div className="min-h-screen bg-white font-[Outfit] text-[#0d2e2c]">
 
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-
-        {/* LEFT SIDE IMAGE */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white rounded-3xl shadow-2xl p-10"
-        >
-          
-          <img
-            src={`http://localhost:5000/${bike.images[0]}`}
-            alt={bike.bikeName}
-            className="w-full h-96 object-contain"
-            
-          />
-        
-        </motion.div>
-
-        {/* RIGHT SIDE DETAILS */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-6"
-        >
-          <h1 className="text-4xl font-bold text-[#0F172A]">
-            {bike.bikeName}
-          </h1>
-
-          <p className="text-gray-500 text-lg">
-            {bike.brand} {bike.model} ({bike.year})
-          </p>
-
-          <div className="flex items-center gap-2 text-gray-600">
-            <MapPin size={18} />
-            {bike.location?.city}
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-lg space-y-4">
-
-            <div className="flex justify-between">
-              <span className="flex items-center gap-2">
-                <IndianRupee size={16} />
-                Per Day
-              </span>
-              <span className="font-bold text-[#20B2AA]">
-                ₹{bike.pricing?.perDay}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="flex items-center gap-2">
-                <Calendar size={16} />
-                Per Hour
-              </span>
-              <span className="font-bold text-[#20B2AA]">
-                ₹{bike.pricing?.perHour}
-              </span>
-            </div>
-          </div>
-
-          {/* Extra Info Section */}
-          <div className="bg-[#F0FDFA] p-6 rounded-2xl">
-            <h3 className="font-semibold text-lg mb-3">
-              Bike Information
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4 text-gray-600 text-sm">
-              <div>
-                <span className="font-medium">Bike Number:</span>
-                <br />
-                {bike.bikeNumber}
-              </div>
-
-              <div>
-                <span className="font-medium">Type:</span>
-                <br />
-                {bike.bikeType}
-              </div>
-
-              <div>
-                <span className="font-medium">Brand:</span>
-                <br />
-                {bike.brand}
-              </div>
-
-              <div>
-                <span className="font-medium">Model:</span>
-                <br />
-                {bike.model}
-              </div>
-              <div>
-                <span className="font-medium">Mileage:</span>
-                <br />
-                {bike.mileage} km/l
-              </div>
-              <div>
-                <span className="font-medium">Address:</span>
-                <br />
-                {bike.location?.addressLine}
-              </div>
-              <div>
-                <span className="font-medium">Availability:</span>
-                <br />
-                {bike.availability ?.type}
-              </div>
-            </div>
-          </div>
-
-          {/* BOOK NOW BUTTON */}
+      {/* TOPBAR */}
+      <div className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b px-6 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate(`/booking/${bike._id}`)}
-            className="w-full bg-gradient-to-r from-[#20B2AA] to-[#178f89] text-white py-4 rounded-2xl text-lg font-semibold hover:scale-105 transition shadow-xl"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1 border px-4 py-1 rounded-full text-sm hover:text-teal-500"
           >
-            Book Now 🚀
+            <ChevronLeft size={14} /> Back
           </button>
-        </motion.div>
+          <span className="font-semibold">{bike.bikeName}</span>
+        </div>
 
+        <button
+          onClick={() => navigate(`/booking/${bike._id}`)}
+          className="hidden md:flex items-center gap-2 bg-gradient-to-r from-teal-400 to-teal-600 text-white px-5 py-2 rounded-full shadow"
+        >
+          <Calendar size={14} /> Book Now
+        </button>
+      </div>
+
+      {/* HERO */}
+      <motion.div
+        className="relative h-[420px] flex items-center justify-center bg-[#e8f8f7]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        {/* glow */}
+        <div className="absolute w-[380px] h-[380px] rounded-full hero-glow"></div>
+
+        {/* badge */}
+        <div className="absolute top-6 left-6 bg-white px-4 py-1 rounded-full text-xs flex items-center gap-2 shadow">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          Available Now
+        </div>
+
+        {/* image */}
+        <img
+          src={`${API}${bike.images?.[0]}`}
+          className="h-[340px] object-contain shadow-bike hover:scale-105 transition"
+        />
+
+        {/* price */}
+        <div className="absolute bottom-6 right-6 bg-teal-500 text-white px-5 py-3 rounded-xl shadow">
+          <p className="text-xl font-bold">₹{bike.pricing?.perDay}</p>
+          <p className="text-xs opacity-80">per day</p>
+        </div>
+      </motion.div>
+
+      {/* CONTENT */}
+      <div className="max-w-4xl mx-auto px-6 py-10">
+
+        {/* TITLE */}
+        <div className="flex justify-between items-center flex-wrap gap-3">
+          <h1 className="text-3xl font-black">{bike.bikeName}</h1>
+
+          <div className="flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full text-sm">
+            <Star size={14} fill="#f59e0b" color="#f59e0b" />
+            4.5
+          </div>
+        </div>
+
+        {/* META */}
+        <div className="flex flex-wrap gap-2 mt-4">
+          <span className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-1">
+            <MapPin size={12} /> {bike.location?.city}
+          </span>
+          <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+            {bike.brand} · {bike.model}
+          </span>
+        </div>
+
+        {/* PRICING */}
+        <div className="mt-10">
+          <h2 className="font-semibold mb-4">Pricing</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-teal-50 p-5 rounded-xl">
+              <p className="text-sm text-gray-500">Per Day</p>
+              <p className="text-2xl font-bold text-teal-500">
+                ₹{bike.pricing?.perDay}
+              </p>
+            </div>
+
+            <div className="bg-teal-50 p-5 rounded-xl">
+              <p className="text-sm text-gray-500">Per Hour</p>
+              <p className="text-2xl font-bold text-teal-500">
+                ₹{bike.pricing?.perHour || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* FEATURES */}
+        <div className="mt-10">
+          <h2 className="font-semibold mb-4">Features</h2>
+
+          <div className="flex flex-wrap gap-3">
+            {["Helmet", "Insurance", "Support"].map((f) => (
+              <span
+                key={f}
+                className="bg-teal-50 px-4 py-1 rounded-full flex items-center gap-1 text-sm"
+              >
+                <CheckCircle size={14} /> {f}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* OWNER */}
+        <div className="mt-10 bg-gray-50 p-5 rounded-xl flex items-center gap-4">
+          <div className="w-12 h-12 bg-teal-500 text-white rounded-full flex items-center justify-center">
+            🧑
+          </div>
+
+          <div>
+            <p className="font-semibold">Verified Owner</p>
+            <p className="text-sm text-gray-500">Member since 2023</p>
+          </div>
+
+          <div className="ml-auto text-sm flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full">
+            <Shield size={12} /> Verified
+          </div>
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={() => navigate(`/booking/${bike._id}`)}
+          className="w-full mt-10 py-4 bg-gradient-to-r from-teal-400 to-teal-600 text-white rounded-xl font-bold shadow-lg hover:scale-[1.02] transition"
+        >
+          Book This Bike
+        </button>
+      </div>
+
+      {/* MOBILE BAR */}
+      <div className="fixed bottom-0 w-full bg-white border-t flex justify-between items-center px-6 py-3 md:hidden">
+        <div>
+          <p className="font-bold text-teal-500">₹{bike.pricing?.perDay}</p>
+          <p className="text-xs text-gray-500">per day</p>
+        </div>
+
+        <button
+          onClick={() => navigate(`/booking/${bike._id}`)}
+          className="bg-teal-500 text-white px-6 py-2 rounded-lg"
+        >
+          Book
+        </button>
       </div>
     </div>
   );

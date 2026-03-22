@@ -11,6 +11,10 @@ import UserDashboard from "./pages/UserDashboard";
 import OwnerHandover from "./pages/OwnerHandover";
 import PickupBike from "./pages/PickupBike";
 
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import SuperAdminLogin from "./pages/SuperadminLogin";
+
+
 function App() {
   return (
     <Routes>
@@ -27,6 +31,10 @@ function App() {
       <Route path="/dashboard" element={<UserDashboard />} />
       <Route path="/handover/:id" element={<OwnerHandover />} />
       <Route path="/pickup/:id" element={<PickupBike />} />
+
+      <Route path="/superadmin" element={<SuperAdminDashboard />} />
+      <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+
     </Routes>
   );
 }

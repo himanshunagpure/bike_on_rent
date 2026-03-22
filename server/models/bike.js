@@ -297,4 +297,4 @@ BikeSchema.index({ bikeName: "text", brand: "text", model: "text" });
 // Filter optimization
 BikeSchema.index({ isAvailable: 1, adminStatus: 1 });
 
-export default mongoose.model("Bike", BikeSchema);
+export default mongoose.models.Bike || mongoose.model("Bike", BikeSchema);

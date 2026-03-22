@@ -1,4 +1,5 @@
 import Bike from "../models/bike.js";
+import User from "../models/user.js";
 
 /* ===============================
    CREATE BIKE
@@ -6,7 +7,7 @@ import Bike from "../models/bike.js";
 export const createBike = async (req, res) => {
   try {
     const ownerId = req.user.userId;  // ✅ Fixed: was req.user.id
-
+console.log("Owner ID:", ownerId);
     let {
       bikeName,
       bikeNumber,
@@ -135,9 +136,9 @@ export const getBikes = async (req, res) => {
       };
     }
 
-    const bikes = await Bike.find(query)
-      .populate("owner", "name phone")
-      .sort({ createdAt: -1 });
+const bikes = await Bike.find(query)
+Bike.find().populate("owner", "fullName email phone")
+  .sort({ createdAt: -1 });
 
     res.json({ success: true, data: bikes });
 

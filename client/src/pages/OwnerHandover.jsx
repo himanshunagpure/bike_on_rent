@@ -11,7 +11,7 @@ const OwnerHandover = () => {
   const [message, setMessage] = useState("");
 
   const token = localStorage.getItem("token");
-
+  const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   useEffect(() => {
 
     const fetchBooking = async () => {
@@ -19,7 +19,7 @@ const OwnerHandover = () => {
       try {
 
         const res = await axios.get(
-          `http://localhost:5000/api/bookings/${id}`,
+          `${API}/bookings/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -45,7 +45,7 @@ const OwnerHandover = () => {
     try {
 
       const res = await axios.post(
-        "http://localhost:5000/api/bookings/verify-otp",
+        `${API}/bookings/verify-otp`,
         {
           bookingId: id,
           otp

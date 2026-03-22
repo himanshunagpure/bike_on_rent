@@ -12,75 +12,93 @@ const UserDashboard = () => {
   const [helpMsg, setHelpMsg] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const API = "http://localhost:5000/api";
-  const token = localStorage.getItem("token");
+const API = import.meta.env.VITE_API_URL;
+const token = localStorage.getItem("token");
 
-  const config = useMemo(() => ({
-    headers: { Authorization: `Bearer ${token}` }
-  }), [token]);
+const config = useMemo(() => ({
+  headers: { Authorization: `Bearer ${token}` }
+}), [token]);
 
-  /* ---------------- PROFILE ---------------- */
-  const fetchProfile = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/user/profile`, config);
-      setUser(res.data.data);
-    } catch (err) {
-      console.error("Profile error:", err);
-    }
-  }, [config]);
+/* ---------------- PROFILE ---------------- */
+const fetchProfile = useCallback(async () => {
+  try {
+    const res = await axios.get(`${API}/user/profile`, config);
+    setUser(res.data.data);
+  } catch (err) {
+    console.error("Profile error:", err);
+  }
+}, [API, config]);
 
-  /* ---------------- USER BIKES ---------------- */
-  const fetchUserBikes = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/bikes/user/my`, config);
-      setUploadedBikes(res.data.bikes || []);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [config]);
+/* ---------------- USER BIKES ---------------- */
+const fetchUserBikes = useCallback(async () => {
+  try {
+    const res = await axios.get(`${API}/bikes/user/my`, config);
+    setUploadedBikes(res.data.bikes || []);
+  } catch (err) {
+    console.error(err);
+  }
+}, [API, config]);
 
-  /* ---------------- BOOKINGS ---------------- */
-  const fetchBookings = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API}/bookings/my`, config);
-      setBookedBikes(res.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [config]);
-
-  /* ---------------- WALLET ---------------- */
-  const fetchWallet = useCallback(async () => {
-    // TODO: Implement wallet API
-    setWalletTxns([]);
-  }, []);
-
-  const addMoney = async () => {
-    // TODO: Implement add money API
-    alert("Wallet feature coming soon!");
-  };
-
-  /* ---------------- REVIEWS ---------------- */
-  const fetchReviews = useCallback(async () => {
-    if (!user || !user._id) return;
-    try {
-      const res = await axios.get(`${API}/reviews/${user._id}`, config);
-      setReviews(res.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [config, user]);
+/* ---------------- BOOKINGS ---------------- */
+const fetchBookings = useCallback(async () => {
+  try {
+    const res = await axios.get(`${API}/bookings/my`, config);
+    setBookedBikes(res.data || []);
+  } catch (err) {
+    console.error(err);
+  }
+}, [API, config]);
 
 
+const addMoney = async () => {
+  try {
+    await axios.post(`${API}/wallet/add`, {
+      amount: addAmount
+    }, config);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserBikes();
-      fetchBookings();
-      fetchWallet();
-      fetchReviews();
-    }
-  }, [user]);
+    alert("Money added successfully");
+
+    fetchWallet(); // refresh wallet
+    setAddAmount("");
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+/* ---------------- REVIEWS ---------------- */
+const fetchReviews = useCallback(async () => {
+  if (!user?._id) return;
+
+  try {
+    const res = await axios.get(`${API}/reviews/${user._id}`, config);
+    setReviews(res.data || []);
+  } catch (err) {
+    console.error(err);
+  }
+}, [API, config, user]);
+const fetchWallet = useCallback(async () => {
+  try {
+    const res = await axios.get(`${API}/wallet`, config);
+    setWalletTxns(res.data.transactions || []);
+  } catch (err) {
+    console.error("Wallet error:", err);
+  }
+}, [API, config]);
+/* -------- LOAD PROFILE -------- */
+useEffect(() => {
+  fetchProfile();
+}, [fetchProfile]);
+
+/* -------- LOAD DATA AFTER USER -------- */
+useEffect(() => {
+  if (user) {
+    fetchUserBikes();
+    fetchBookings();
+    fetchWallet();
+    fetchReviews();
+  }
+}, [user, fetchUserBikes, fetchBookings, fetchWallet,fetchReviews]);
 
   /* ---------------- HELP DESK ---------------- */
   const submitTicket = async () => {

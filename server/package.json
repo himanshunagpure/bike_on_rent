@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.6",
@@ -25,6 +26,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.575.0",
+    "mongodb": "^7.1.0",
     "mongoose": "^9.1.1",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",

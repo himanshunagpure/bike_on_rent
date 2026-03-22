@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+role: {
+  type: String,
+  enum: ["user", "owner", "superadmin"],
+  default: "user"
+},
+
     phone: {
       type: String,
       unique: true,
@@ -28,11 +34,6 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
 
     location: {
       type: {
