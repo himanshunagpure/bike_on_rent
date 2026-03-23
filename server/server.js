@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "./.env" }); 
+dotenv.config(); 
 import express from 'express';
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-
+import fs from "fs";
+git 
 
 import connectDB from "./config/db.js";
 
@@ -29,6 +30,11 @@ app.use(cors());
 app.use(morgan("dev"));
 
 app.use("/api/bikes", bikeRoutes);
+
+
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads", { recursive: true });
+}
 // app.use("/api/disputes", disputeCommentRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payment", paymentRoutes);
