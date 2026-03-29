@@ -113,11 +113,15 @@ export const registerUser = async (req, res) => {
    console.log("6. User created successfully");  // ← ADD
 
     // 🔥 FIXED (non-blocking)
-    sendEmail(
-      email,
-      "BIKEONRENT Email Verification OTP",
-      `Your OTP for email verification is: ${otp}`
-    ).catch(err => console.error("Email failed:", err));
+   try {
+  await sendEmail(
+    email,
+    "BIKEONRENT Email Verification OTP",
+    `Your OTP is: ${otp}`
+  );
+} catch (err) {
+  console.error("Email failed:", err.message);
+}
 
     res.status(201).json({
       status: "success",
