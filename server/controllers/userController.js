@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
+import { generateOTPEmailTemplate, generateResetPasswordEmailTemplate, generatePasswordResetLinkTemplate } from "../utils/emailTemplateNew.js";
 
 /* -------------------- HELPERS -------------------- */
 const normalizeEmail = (email) => email?.trim().toLowerCase();
@@ -69,7 +70,8 @@ export const registerUser = async (req, res) => {
         sendEmail(
           email,
           "BIKEONRENT Email Verification OTP",
-          `Your OTP is: ${otp}`
+          `Your OTP is: ${otp}`,
+          generateOTPEmailTemplate(otp, existingUser.fullName)
         ).catch(err => console.error("Email failed:", err));
 
         return res.status(200).json({
@@ -117,7 +119,8 @@ export const registerUser = async (req, res) => {
   await sendEmail(
     email,
     "BIKEONRENT Email Verification OTP",
-    `Your OTP is: ${otp}`
+    `Your OTP is: ${otp}`,
+    generateOTPEmailTemplate(otp, fullName)
   );
 } catch (err) {
   console.error("Email failed:", err.message);
@@ -236,7 +239,8 @@ export const resendOTP = async (req, res) => {
     await sendEmail(
       normalizedEmail,
       "BIKEONRENT Resend OTP",
-      `Your new OTP is: ${otp}`
+      `Your new OTP is: ${otp}`,
+      generateOTPEmailTemplate(otp, user.fullName)
     );
 
     res.status(200).json({
@@ -413,14 +417,13 @@ export const forgotPassword = async (req, res) => {
     await user.save();
 
     // ✅ SEND EMAIL HERE (AFTER SAVE)
+    const resetLink = `${process.env.APP_DOMAIN_FRONTEND}/reset-password/${resetToken}`;
+    
     await sendEmail(
       normalizedEmail,
       "Reset Your BIKEONRENT Password",
-      `Click this link to reset your password:
-
-http://localhost:3000/reset-password/${resetToken}
-
-This link will expire in 15 minutes.`
+      `Click this link to reset your password:\n${resetLink}\n\nThis link will expire in 15 minutes.`,
+      generatePasswordResetLinkTemplate(resetLink, user.fullName)
     );
 
     res.status(200).json({
