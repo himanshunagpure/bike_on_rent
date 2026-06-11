@@ -8,25 +8,36 @@ const sendEmail = async (to, subject, text, htmlContent) => {
       throw new Error("RESEND_FROM is not set. Use your verified Resend sender address in the server .env file.");
     }
 
+    // Validate email address
+    if (!to || !to.includes("@")) {
+      throw new Error(`Invalid recipient email: ${to}`);
+    }
+
     const resend = getResendClient();
 
-    console.log("Sending email to:", to);
+    console.log("📧 Sending email to:", to);
+    console.log("📧 From:", from);
+    console.log("📧 Subject:", subject);
 
     const { data, error } = await resend.emails.send({
       from,
-      to: [to],
+      to: Array.isArray(to) ? to : [to],
       subject,
       text,
       html: htmlContent || text,
     });
 
     if (error) {
+      console.error("❌ Resend API Error:", error);
       throw new Error(error.message || "Resend email sending failed.");
     }
 
-    console.log("Email sent successfully:", data?.id);
+    console.log("✅ Email sent successfully!");
+    console.log("📧 Email ID:", data?.id);
+    return { success: true, data };
   } catch (err) {
-    console.error("sendEmail FAILED:", err.message);
+    console.error("❌ sendEmail FAILED:", err.message);
+    return { success: false, error: err.message };
   }
 };
 
